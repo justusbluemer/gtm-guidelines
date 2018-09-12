@@ -60,6 +60,19 @@ Custom JavaScript is more prone to errors than the solutions that Google Tag Man
 * If you're asked to implement some tracking code, check if there's a GTM-native tag template
 * Use lookup or regex tables instead of if…else constructs
 
+### Document all functions
+
+If you write your own functions, document them [using JSDoc3 syntax](http://usejsdoc.org/about-getting-started.html).
+
+	/**
+	 * Increases the supplied number by one
+	 * @param  {number} number The number to increase
+	 * @return {number}        The number increased by 1
+	 */
+	function increaseByOne(number) {
+		return number + 1;
+	}
+
 ### Use JS error reporting
 
 It is difficult to make every piece of code work flawlessly for every user on every device.
