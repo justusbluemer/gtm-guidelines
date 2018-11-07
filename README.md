@@ -129,6 +129,12 @@ That includes email and IP adresses.
 
 Your proprietary user ID can be okay if only you can trace it back to an individual. Nevertheless you should consult with a privacy expert first.
 
+### Do not push to dataLayer from Google Tag Manager itself
+
+In most cases it's not a good idea to use `dataLayer.push` in your Custom HTML/JS code inside Google Tag Manager as it can be confusing when events can come from both outside and inside GTM.
+
+Wherever possible, use the built-in [Tag Sequencing](https://www.simoahava.com/analytics/understanding-tag-sequencing-in-google-tag-manager/) capabilities if you're trying to implement dependencies between tags or if you want to avoid race conditions (s situation where you require things to be processed in a certain order but you can't guarantee that order).
+
 ## Access management
 
 Give container publishing access to as few people as possible. Everyone who doesn't _absolutely_ need it should have read access.
