@@ -1,7 +1,40 @@
 # GTM Guidelines
 
 These guidelines are a collection of things any [Google Tag Manager (GTM)](https://www.google.com/analytics/tag-manager/) user should be aware of and understand before actually implementing tracking using the tool.
-While marketed and understood by many as a simple WYSIWYG tracking editor anyone can use, GTM is a powerful tool which gives its users unrestricted access to the entire website and its data and functionality. With great power comes great responsibility and these guidelines are supposed to help navigate the jungle that can be tracking implementation. 
+While marketed and understood by many as a simple WYSIWYG tracking editor anyone can use, GTM is a powerful tool which gives its users unrestricted access to the entire website and its data and functionality. With great power comes great responsibility and these guidelines are supposed to help navigate the jungle that can be tracking implementation.
+
+## Table of Contents
+
+-   [GTM Guidelines](#gtm-guidelines)
+    -   [JavaScript](#javascript)
+        -   [Isolate custom JavaScript](#isolate-custom-javascript)
+        -   [Reuse code with function variables](#reuse-code-with-function-variables)
+        -   [Adhere to the browser support guideline of your website](#adhere-to-the-browser-support-guideline-of-your-website)
+        -   [Do not use Custom JS where built-in solutions suffice](#do-not-use-custom-js-where-built-in-solutions-suffice)
+        -   [Document all functions](#document-all-functions)
+        -   [Use JS error reporting](#use-js-error-reporting)
+        -   [Do not use console.log in production](#do-not-use-consolelog-in-production)
+        -   [Block requests during testing](#block-requests-during-testing)
+    -   [Security](#security)
+        -   [Use subresource integrity](#use-subresource-integrity)
+        -   [Ask for a Content Security Policy (CSP)](#ask-for-a-content-security-policy--csp-)
+        -   [Ask a(nother) developer](#ask-a-nother--developer)
+    -   [dataLayer](#datalayer)
+        -   [Do not use tool-specific dataLayer naming and structure](#do-not-use-tool-specific-datalayer-naming-and-structure)
+        -   [Do not push personally identifiable information (PII) to dataLayer](#do-not-push-personally-identifiable-information--pii--to-datalayer)
+        -   [Do not push to dataLayer from Google Tag Manager itself](#do-not-push-to-datalayer-from-google-tag-manager-itself)
+    -   [Access management](#access-management)
+    -   [Workflow](#workflow)
+        -   [Workspaces](#workspaces)
+        -   [Use constants for all configurations](#use-constants-for-all-configurations)
+        -   [Activate only the auto variables you need](#activate-only-the-auto-variables-you-need)
+        -   [Version names and notes](#version-names-and-notes)
+        -   [Folders](#folders)
+    -   [Naming](#naming)
+        -   [Tags](#tags)
+        -   [Trigger](#trigger)
+        -   [Variables](#variables)
+            -   [Examples for variables](#examples-for-variables)
 
 ## JavaScript
 
@@ -11,44 +44,57 @@ JavaScript in Google Tag Manager can interfere with your website's JavaScript in
 
 JS in GTM should not leak into the global variable space. Always make sure to limit the scope of your implementations by wrapping your code in an anonymous function
 
-    // good
-    (function() {
-        var foo = 'bar'
-    })()
+```js
+// good
+;(function() {
+    var foo = "bar"
+})()
 
-    // bad
-    var foo = 'bar'
+// bad
+var foo = "bar"
+```
 
 If you need to persist variable information for the duration of the pageview or you need to access the same variable from multiple tag executions, use a dataLayer variable.
 
-    // 1st tag
-    (function() {
-        dataLayer.push({
-            foo: 'bar'
-        })
-    })()
+```js
+// 1st tag
+;(function() {
+    dataLayer.push({
+        foo: "bar",
+    })
+})()
+```
 
-    // 2nd tag
-    console.log({{dl.foo}})
+// 2nd tag
+console.log({{dl.foo}})
 
 ### Reuse code with function variables
 
 Instead of a simple string or integer, you can return a function as the result of a GTM variable of the _Custom JavaScript_ type.
 
-    // Custom JavaScript variable: js.double
-    function () {
-        var doubleSize = function(number) {
-            return number * 2
-        }
-        return doubleSize
+```js
+// Custom JavaScript variable: js.double
+function () {
+    var doubleSize = function(number) {
+        return number * 2
     }
+    return doubleSize
+}
+```
 
 Your anonymous outer function returns another function, in this example `doubleSize`.
 You can then use {{js.double}} as a function in other JavaScript based GTM tags and variables:
 
-    {{js.double}}(2)
-    // Output: 4
-	
+```js
+{
+    {
+        js.double
+    }
+}
+2
+// Output: 4
+```
+
 ### Adhere to the browser support guideline of your website
 
 Know which browsers your website / your company officially supports. Unfortunately there are still plenty of JavaScript features that semi-popular browsers do not support. Implementing these anyway without fallbacks or programmatically checking for browser support beforehand can break your tracking or even website functionality itself.
@@ -57,21 +103,23 @@ Know which browsers your website / your company officially supports. Unfortunate
 
 Custom JavaScript is more prone to errors than the solutions that Google Tag Manager supports out of the box. Use the built-in tag templates instead of JavaScript where you can.
 
-* If you're asked to implement some tracking code, check if there's a GTM-native tag template
-* Use lookup or regex tables instead of if…else constructs
+-   If you're asked to implement some tracking code, check if there's a GTM-native tag template
+-   Use lookup or regex tables instead of if…else constructs
 
 ### Document all functions
 
 If you write your own functions, document them [using JSDoc3 syntax](http://usejsdoc.org/about-getting-started.html).
 
-	/**
-	 * Increases the supplied number by one
-	 * @param  {number} number The number to increase
-	 * @return {number}        The number increased by 1
-	 */
-	function increaseByOne(number) {
-		return number + 1;
-	}
+```js
+/**
+ * Increases the supplied number by one
+ * @param  {number} number The number to increase
+ * @return {number}        The number increased by 1
+ */
+function increaseByOne(number) {
+    return number + 1
+}
+```
 
 ### Use JS error reporting
 
@@ -86,6 +134,11 @@ Do not use your tracking tool for JavaScript error detection, they have nothing 
 
 Do not use `console.log` on production systems. It needlessly clutters both your code and the users' browser console.
 Feel free to use it for debugging purposes during development in preview mode, though.
+
+### Block requests during testing
+
+If you don't divert traffic to a "staging" or "development" property during testing, you should pay attention to the tracking requests you or other GTM users may inadvertantly send out during testing. This is especially relevant for 3rd party conversion pixels where your partner can't easily differentiate between "debug traffic" and real traffic.
+Blocking requests is [easy in Google Chrome Developer Tools](https://stackoverflow.com/questions/27863094/how-to-block-a-url-in-chromes-developer-tools-network-monitor#answers).
 
 ## Security
 
@@ -110,15 +163,17 @@ If you are not _entirely_ sure what you are doing, consult with one or more prof
 Make sure the names of dataLayer variables are always as descriptive as possible.
 Do not use tool specific keys, even if it may seem convenient. Separating tool logic from the website is one of the most important goals of using Google Tag Manager.
 
-    // good
-    dataLayer.push({
-        loginStatus: true
-    })
+```js
+// good
+dataLayer.push({
+    loginStatus: true,
+})
 
-    // bad
-    dataLayer.push({
-        dimension17: 1
-    })
+// bad
+dataLayer.push({
+    dimension17: 1,
+})
+```
 
 Use Custom JavaScript variables to preprocess data for individual tools if necessary.
 
@@ -160,11 +215,11 @@ Activate only the ones you actively use. The values of inactive auto variables d
 
 ### Version names and notes
 
-* Name every version. The changes of the version should be intuitively clear from just the name. Focus on the _business impact_ of the change rather than the technical details. If you use a ticket or task system like JIRA, include the ticket ID in the version name.
-* Write version notes for every version. The notes should answer
-  * Who requested the change?
-  * What was the tracking behavior before the release, what's it like now?
-  * Were there website changes that this GTM implementation depends on? If so, what are they?
+-   Name every version. The changes of the version should be intuitively clear from just the name. Focus on the _business impact_ of the change rather than the technical details. If you use a ticket or task system like JIRA, include the ticket ID in the version name.
+-   Write version notes for every version. The notes should answer
+    -   Who requested the change?
+    -   What was the tracking behavior before the release, what's it like now?
+    -   Were there website changes that this GTM implementation depends on? If so, what are they?
 
 ### Folders
 
@@ -226,5 +281,5 @@ A `tool` in this case can be either a product like `adform`, `hotjar`, `kissmetr
 
 #### Examples for variables
 
-* An Adform publisher ID: `const.adform.id`
-* A JavaScript reformatting script which provides product data in a specific format, relevant only to Yahoo: `js.yahoo.productData`
+-   An Adform publisher ID: `const.adform.id`
+-   A JavaScript reformatting script which provides product data in a specific format, relevant only to Yahoo: `js.yahoo.productData`
