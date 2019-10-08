@@ -240,7 +240,7 @@ Use folders to group your elements by the goal they are achieving.
 | :---------------------------------------------- | :------------------------------------------- |
 | Tag type + specific tag type - other identifier |                                              |
 | GA pageview - all pages                         | a standard Universal Analytics Pageview Tag  |
-| GA event - outbound link click                  | A pageview. By your definition, so it's not  |
+| GA event - outbound link click                  | a Universal Analytics event                  |
 | HTML FB - like                                  | Facebook Tracking Pixel Implemented as HTML  |
 
 ### Trigger
