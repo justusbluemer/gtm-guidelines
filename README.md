@@ -234,6 +234,14 @@ Use folders to group your elements by the goal they are achieving.
 ## Naming
 
 ### Tags
+`Type` `Description`
+
+| Type                                            | Description                                  |
+| :---------------------------------------------- | :------------------------------------------- |
+| Tag type + specific tag type - other identifier |                                              |
+| GA pageview - all pages                         | a standard Universal Analytics Pageview Tag  |
+| GA event - outbound link click                  | A pageview. By your definition, so it's not  |
+| HTML FB - like                                  | Facebook Tracking Pixel Implemented as HTML  |
 
 ### Trigger
 
